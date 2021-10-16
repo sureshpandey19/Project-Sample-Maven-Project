@@ -2,9 +2,9 @@
 
 #####################written by suresh at 15102021 for star conversion process if metadata error in content###########################
 #####################written by suresh at 16102021 for star conversion process if metadata error in content resolution and audio bitrate handled with listing case###########################
-QC_FAIL='/Video/star/qcfail'
-FINAL_PATH='/Video/star/input/video_input'
-LOG='/var/mam/mam.star/mam.script/tc_log'
+QC_FAIL='/home/skp'
+FINAL_PATH='/home/skp/input/video_input'
+LOG='/home/skp/tc_log'
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 LOGNAME=$(date '+%Y-%m-%d')
 FFMPEG=$(which ffmpeg)
