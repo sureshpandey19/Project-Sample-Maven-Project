@@ -10,10 +10,14 @@ LOGNAME=$(date '+%Y-%m-%d')
 FFMPEG=$(which ffmpeg)
 MEDIAINFO=$(which mediainfo)
 FFPROBE=$(which ffprobe)
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+ERROR='descriptor'
 
 
 while true; do
-CONTENT_LIST=$(ls -ltr $QC_FAIL  | grep AT | awk {'print $9'})
+CONTENT_LIST=$(ls -ltr $QC_FAIL   | awk {'print $9'} | grep -iE '.mxf|.MXF')
 
 
 echo '========================WAITING FOR NEW FILES....=============== '
@@ -21,6 +25,17 @@ echo '========================WAITING FOR NEW FILES....=============== '
 sleep 1
 
 for id in $CONTENT_LIST; do
+
+
+rm -rf .error
+
+sleep 1
+
+$FFPROBE -v error -select_streams v:0 $QC_FAIL/$id 2> .error
+
+if grep -RE $ERROR .error; then
+
+
 
 if ! grep -R $id $LOG/.temp; then
 
@@ -101,11 +116,11 @@ $FFMPEG -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAI
                         #rm -rvf $QC_FAIL/RawFiles/*
                         mkdir -p $QC_FAIL/RawFiles
 
-			ffmpeg -y -i $QC_FAIL/$id   -map 0:1 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.2.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.3.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav -map_channel 0.4.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc3.wav -map_channel 0.5.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc4.wav ##2>> $LOG/${LOGNAME}.txt
+			$FFMPEG -y -i $QC_FAIL/$id   -map 0:1 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.2.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.3.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav -map_channel 0.4.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc3.wav -map_channel 0.5.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc4.wav ##2>> $LOG/${LOGNAME}.txt
 
 			if [[ $? -eq 0 ]]; then
 
-ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav  -i $QC_FAIL/RawFiles/abc3.wav  -i $QC_FAIL/RawFiles/abc4.wav  -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0 -map 3:0 -map 4:0  -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
+$FFMPEG -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav  -i $QC_FAIL/RawFiles/abc3.wav  -i $QC_FAIL/RawFiles/abc4.wav  -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0 -map 3:0 -map 4:0  -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
 				if [[ $? -eq 0 ]]; then
 				echo 'FILE SUCCESSFULLY CONVERTED!' $id "at" $TIMESTAMP | tee -a $LOG/${LOGNAME}.txt
 					echo '========================================================' | tee -a $LOG/${LOGNAME}.txt
@@ -127,11 +142,11 @@ ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL
                         #rm -rvf $QC_FAIL/RawFiles/*
                         mkdir -p $QC_FAIL/RawFiles
 
-                        ffmpeg -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.2.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav ##2>> $LOG/${LOGNAME}.txt
+                        $FFMPEG -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.2.0   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav ##2>> $LOG/${LOGNAME}.txt
 
                         if [[ $? -eq 0 ]]; then
 
-ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav   -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0   -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
+$FFMPEG -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav   -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0   -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
                                 if [[ $? -eq 0 ]]; then
                                 echo 'FILE SUCCESSFULLY CONVERTED!' $id "at" $TIMESTAMP | tee -a $LOG/${LOGNAME}.txt
                                         echo '========================================================' | tee -a $LOG/${LOGNAME}.txt
@@ -152,11 +167,11 @@ ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL
                         rm -rf $QC_FAIL/RawFiles/*
                         mkdir -p $QC_FAIL/RawFiles
 
-                        ffmpeg -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.1.1   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav  ##2>> $LOG/${LOGNAME}.txt
+                        $FFMPEG -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.1.1   -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav  ##2>> $LOG/${LOGNAME}.txt
 
 			if [[ $? -eq 0 ]]; then
 
-			ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav    -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0 -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
+			$FFMPEG -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav    -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0 -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
 			if [[ $? -eq 0 ]]; then
                                 echo 'FILE SUCCESSFULLY CONVERTED!' $id "at" $TIMESTAMP | tee -a $LOG/${LOGNAME}.txt
 				echo '========================================================' | tee -a $LOG/${LOGNAME}.txt
@@ -175,11 +190,11 @@ ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL
                         rm -rf $QC_FAIL/RawFiles/*
                         mkdir -p $QC_FAIL/RawFiles
 
-                        ffmpeg -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.1.1 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav -map_channel 0.1.2 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc3.wav -map_channel 0.1.3 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc4.wav -map_channel 0.1.4 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc5.wav -map_channel 0.1.5 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc6.wav -map_channel 0.1.6 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc7.wav -map_channel 0.1.7  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav  ##2>> $LOG/${LOGNAME}.txt
+                        $FFMPEG -y -i $QC_FAIL/$id   -map 0:0 -top 1 -flags:v +ilme+ildct -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k $QC_FAIL/RawFiles/abc.m2v -map_channel 0.1.0  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc1.wav -map_channel 0.1.1 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav -map_channel 0.1.2 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc3.wav -map_channel 0.1.3 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc4.wav -map_channel 0.1.4 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc5.wav -map_channel 0.1.5 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc6.wav -map_channel 0.1.6 -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc7.wav -map_channel 0.1.7  -b:a ${AUDIO_BIT_RATE}k $QC_FAIL/RawFiles/abc2.wav  ##2>> $LOG/${LOGNAME}.txt
 
                         if [[ $? -eq 0 ]]; then
 
-                        ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav -i $QC_FAIL/RawFiles/abc3.wav -i $QC_FAIL/RawFiles/abc4.wav -i $QC_FAIL/RawFiles/abc5.wav -i $QC_FAIL/RawFiles/abc6.wav -i $QC_FAIL/RawFiles/abc7.wav -i $QC_FAIL/RawFiles/abc8.wav   -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0  -map 3:0 -map 4:0 -map 5:0 -map 6:0 -map 7:0 -map 8:0 -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
+                        $FFMPEG -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL/RawFiles/abc2.wav -i $QC_FAIL/RawFiles/abc3.wav -i $QC_FAIL/RawFiles/abc4.wav -i $QC_FAIL/RawFiles/abc5.wav -i $QC_FAIL/RawFiles/abc6.wav -i $QC_FAIL/RawFiles/abc7.wav -i $QC_FAIL/RawFiles/abc8.wav   -vcodec mpeg2video -acodec pcm_s24le -b:v ${CONVERTED_BITRATE}k -bufsize ${CONVERTED_BITRATE}k -minrate ${CONVERTED_BITRATE}k -maxrate ${CONVERTED_BITRATE}k -b:a ${AUDIO_BIT_RATE}k -timecode $SOM -map 0:0  -map 1:0  -map 2:0  -map 3:0 -map 4:0 -map 5:0 -map 6:0 -map 7:0 -map 8:0 -s ${VIDEO_WIDTH}x${VIDEO_HEIGHT} -aspect 4:3  -top 1 -flags:v +ilme+ildct $FINAL_PATH/${CLIP_ID}_WR.${CLIP_EXT} ##2>> $LOG/${LOGNAME}.txt
                         if [[ $? -eq 0 ]]; then
                                 echo 'FILE SUCCESSFULLY CONVERTED!' $id "at" $TIMESTAMP | tee -a $LOG/${LOGNAME}.txt
                                 echo '========================================================' | tee -a $LOG/${LOGNAME}.txt
@@ -192,13 +207,21 @@ ffmpeg -y -i $QC_FAIL/RawFiles/abc.m2v -i $QC_FAIL/RawFiles/abc1.wav -i $QC_FAIL
                         rm -rvf $QC_FAIL/RawFiles/*
                          fi
 
-fi
+				fi
 
-else
+					else
 
-		echo '=============NO ANY NEW FILE FOUND OR' $id 'CONVERSION ALREADY DONE!!!!============='
-		date +%s
-fi
+						echo -e '=============NO ANY NEW FILE FOUND OR' ${RED}$id${NC} 'CONVERSION ALREADY DONE!!!!============='
+						#date +%s
+					fi
+					else
+
+                				echo -e 'NO ANY SEPCIFIED ERROR FOUND IN:' ${GREEN}$id${NC} 'CONTENT!!'
+
+					fi
+
+
+
 done
 
 
