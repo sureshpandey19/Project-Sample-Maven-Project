@@ -17,7 +17,7 @@ while [[ "$#" -gt 0 ]]; do
 shift
 done
 
-echo ""
+#echo ""
 if [[ $version == "Version" ]]
 then
     echo "Component_Deploy_Create Ver. 20.21.12.1 Copy Right@2020 - Planetcast media Services limited,NOIDA,IND"
@@ -46,12 +46,17 @@ fi
 if [[ $clip !=  "" && $ext != ""  &&  $s_path != "" && $d_path != "" ]] 
 then
 
-    /usr/local/bin/scp_comp.sh $clip  $ext $s_path $d_path
-	if [ $? -eq 0 ]
+    /home/skp/testcode/MD_CORRECTION_SCRIPT_new.sh $clip  $ext $s_path $d_path
+	STATUS=`echo $?`
+	if [ $STATUS -eq 0 ]
 	then
-        exit 0
-	else
-		exit 1
+        	echo "Process Success"
+	elif [ $STATUS -eq 2 ]
+	then
+		echo "Provided File or Path Doest Not exists"
+	elif [ $STATUS -eq 1 ]
+        then
+		echo "Process Failed"
 	fi	
 
 else
