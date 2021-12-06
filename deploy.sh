@@ -7,7 +7,9 @@ while [[ "$#" -gt 0 ]]; do
                 -p|--password) password="$2"; shift;;
                 -P|--port) Port="$2"; shift;;
                 -D|--destinationpath) d_path="$2"; shift;;
-				-S|--sourcepath) s_path="$2"; shift;;
+		-S|--sourcepath) s_path="$2"; shift;;
+		-c|--clipname) clip=$2; shift;;
+		-e|--extension) ext=$2; shift;;
                 -h|--help) help="Help"; ;;
 		-v|--version) version="Version"; ;;
 	                  *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -18,7 +20,7 @@ done
 echo ""
 if [[ $version == "Version" ]]
 then
-    echo "Component_Deploy_Create Ver. 20.20.9.1 Copy Right@2020 - Planetcast media Services limited,NOIDA,IND"
+    echo "Component_Deploy_Create Ver. 20.21.12.1 Copy Right@2020 - Planetcast media Services limited,NOIDA,IND"
 fi
 
 if [[ $help == "Help" ]]
@@ -33,16 +35,18 @@ then
 	echo "-p,--password               Host Root User Password"
 	echo "-P,--port                   Host SSH Connection Port"
 	echo "-D,--destinationpath        Binary Destination Path"
-	echo "-S,--sourcepath        Binary Source Path"
+	echo "-S,--sourcepath        	  Binary Source Path"
+	echo "-c,--clipname		  Clip Name"
+	echo "-e,--extension		  Extension Name of Clip"
 	echo "-v,--version                Application Version"
 	echo "-h,--help                   Application Help" 
 	echo "---------------------------------------------------------"
 fi	
 
-if [[ $host !=  "" && $username != ""  &&  $password != "" && $Port != "" && $d_path != "" ]] 
+if [[ $clip !=  "" && $ext != ""  &&  $s_path != "" && $d_path != "" ]] 
 then
 
-    /usr/local/bin/scp_comp.sh $host  $username $password $s_path $d_path
+    /usr/local/bin/scp_comp.sh $clip  $ext $s_path $d_path
 	if [ $? -eq 0 ]
 	then
         exit 0
